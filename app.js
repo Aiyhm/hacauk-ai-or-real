@@ -106,12 +106,153 @@
     }
   };
 
+  // Original background loop: bouncy jungle marimba, log drums and shaker.
+  var STEP = 60 / 126 / 4; // sixteenth notes at 126 bpm
+  var SWING = 0.018;
+  var BARS = [
+    { root: 45, notes: [[0, 69], [3, 72], [6, 76], [8, 74], [10, 72], [12, 69], [14, 67]] },
+    { root: 41, notes: [[0, 65], [3, 69], [6, 72], [8, 74], [11, 72], [14, 69]] },
+    { root: 43, notes: [[0, 67], [2, 71], [4, 74], [7, 79], [10, 76], [12, 74], [14, 71]] },
+    { root: 40, notes: [[0, 71], [3, 67], [6, 64], [8, 67], [10, 71], [12, 74], [15, 76]] },
+    { root: 48, notes: [[0, 79], [2, 76], [4, 72], [6, 76], [8, 79], [11, 81], [14, 79]] },
+    { root: 43, notes: [[0, 74], [2, 71], [4, 67], [6, 71], [8, 74], [11, 76], [14, 74]] },
+    { root: 41, notes: [[0, 72], [2, 69], [4, 65], [6, 69], [8, 72], [10, 74], [12, 76], [14, 77]] },
+    { root: 40, notes: [[0, 76], [4, 71], [6, 68], [8, 71], [10, 74], [12, 76]] }
+  ];
+  var BASS_STEPS = { 0: 0, 3: 0, 6: 7, 8: 0, 11: 0, 14: 7 };
+  var DRUM_STEPS = { 0: 95, 6: 95, 8: 140, 12: 95, 14: 140 };
+
+  var musicOn = true;
+  var musicStarted = false;
+  var musicBus = null;
+  var musicTimer = null;
+  var noise = null;
+  var nextStepAt = 0;
+  var stepIndex = 0;
+
+  function midi(note) {
+    return 440 * Math.pow(2, (note - 69) / 12);
+  }
+
+  function musicTone(freq, at, length, type, volume, endFreq) {
+    var ctx = audio;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, at);
+    if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, at + length);
+    gain.gain.setValueAtTime(volume, at);
+    gain.gain.exponentialRampToValueAtTime(0.001, at + length);
+    osc.connect(gain);
+    gain.connect(musicBus);
+    osc.start(at);
+    osc.stop(at + length);
+  }
+
+  function shaker(at, volume) {
+    var src = audio.createBufferSource();
+    var filter = audio.createBiquadFilter();
+    var gain = audio.createGain();
+    src.buffer = noise;
+    filter.type = 'highpass';
+    filter.frequency.value = 6500;
+    gain.gain.setValueAtTime(volume, at);
+    gain.gain.exponentialRampToValueAtTime(0.001, at + 0.04);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(musicBus);
+    src.start(at);
+    src.stop(at + 0.05);
+  }
+
+  function playStep(index, at) {
+    var bar = BARS[Math.floor(index / 16) % BARS.length];
+    var step = index % 16;
+    bar.notes.forEach(function (note) {
+      if (note[0] !== step) return;
+      // A marimba: the note plus a quick bright overtone.
+      musicTone(midi(note[1]), at, 0.28, 'sine', 0.3);
+      musicTone(midi(note[1]) * 4, at, 0.06, 'sine', 0.07);
+    });
+    if (step in BASS_STEPS) musicTone(midi(bar.root + BASS_STEPS[step]), at, 0.17, 'triangle', 0.32);
+    if (step in DRUM_STEPS) musicTone(DRUM_STEPS[step] * 1.8, at, 0.15, 'sine', 0.32, DRUM_STEPS[step]);
+    if (step % 2 === 0) shaker(at, step % 4 === 2 ? 0.1 : 0.05);
+  }
+
+  function scheduleMusic() {
+    var now = audio.currentTime;
+    // After the page has been in the background, carry on from now, not from the backlog.
+    if (nextStepAt < now) nextStepAt = now + 0.05;
+    while (nextStepAt < now + 0.2) {
+      playStep(stepIndex, nextStepAt + (stepIndex % 2 ? SWING : 0));
+      nextStepAt += STEP;
+      stepIndex = (stepIndex + 1) % (BARS.length * 16);
+    }
+  }
+
+  function startMusic() {
+    var ctx = getAudio();
+    if (!ctx || musicTimer) return;
+    if (!musicBus) {
+      musicBus = ctx.createGain();
+      musicBus.connect(ctx.destination);
+      noise = ctx.createBuffer(1, ctx.sampleRate * 0.1, ctx.sampleRate);
+      var samples = noise.getChannelData(0);
+      for (var i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+    }
+    musicBus.gain.cancelScheduledValues(ctx.currentTime);
+    musicBus.gain.setValueAtTime(0.5, ctx.currentTime);
+    nextStepAt = ctx.currentTime + 0.05;
+    scheduleMusic();
+    musicTimer = setInterval(scheduleMusic, 40);
+  }
+
+  function stopMusic() {
+    clearInterval(musicTimer);
+    musicTimer = null;
+    // Silences notes that were already scheduled ahead.
+    if (musicBus) musicBus.gain.setTargetAtTime(0, audio.currentTime, 0.02);
+  }
+
+  function renderMusicButtons() {
+    Array.prototype.forEach.call(document.querySelectorAll('.music-toggle'), function (button) {
+      button.textContent = 'Music: ' + (musicOn ? 'on' : 'off');
+      button.setAttribute('aria-pressed', String(musicOn));
+    });
+  }
+
+  function isMusicButton(target) {
+    return target.closest && target.closest('.music-toggle');
+  }
+
+  // Browsers only allow sound after a first tap, so the music starts with that tap.
+  function firstTap(event) {
+    if (musicStarted) return;
+    musicStarted = true;
+    if (musicOn && !isMusicButton(event.target)) startMusic();
+  }
+
   // Every touch or mouse press anywhere on the page gives a blip straight away.
-  document.addEventListener('pointerdown', sounds.tap);
+  document.addEventListener('pointerdown', function (event) {
+    sounds.tap();
+    firstTap(event);
+  });
   // Keyboard presses arrive as clicks with no pointer behind them.
   document.addEventListener('click', function (event) {
-    if (event.detail === 0) sounds.tap();
+    if (event.detail !== 0) return;
+    sounds.tap();
+    firstTap(event);
   });
+  Array.prototype.forEach.call(document.querySelectorAll('.music-toggle'), function (button) {
+    button.addEventListener('click', function () {
+      musicStarted = true;
+      musicOn = !musicOn;
+      if (musicOn) startMusic();
+      else stopMusic();
+      renderMusicButtons();
+    });
+  });
+  renderMusicButtons();
 
   function svgEl(name, attrs) {
     var el = document.createElementNS(NS, name);

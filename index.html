@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
   <!-- Shared arcade art -->
@@ -44,6 +44,7 @@
 
   <!-- Start -->
   <main id="start" class="screen start">
+    <button class="chip chip-btn music-toggle music-corner" type="button"></button>
     <div class="rays-wrap" aria-hidden="true"><div class="rays"></div></div>
     <svg class="grid" viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true"></svg>
 
@@ -84,6 +85,7 @@
       <h2 id="prompt" class="prompt" tabindex="-1" aria-label="Which is AI?"></h2>
       <div class="bar-end">
         <p class="chip">Score <strong id="score-now">0</strong></p>
+        <button class="chip chip-btn music-toggle" type="button"></button>
         <button id="restart" class="chip chip-btn" type="button">Start over</button>
       </div>
     </header>
@@ -113,6 +115,7 @@
 
   <!-- Result -->
   <main id="result" class="screen result" hidden>
+    <button class="chip chip-btn music-toggle music-corner" type="button"></button>
     <div class="rays-wrap" aria-hidden="true"><div class="rays"></div></div>
     <svg class="grid" viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true"></svg>
 
@@ -139,6 +142,6 @@
     </div>
   </main>
 
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
