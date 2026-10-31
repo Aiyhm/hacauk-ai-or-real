@@ -16,7 +16,7 @@
 
 * { box-sizing: border-box; margin: 0; }
 /* Everything scales with the screen so it reads from the back of a classroom */
-html { height: 100%; font-size: clamp(16px, min(2.2vh, 1.25vw), 48px); -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+html { height: 100%; font-size: min(2.2vh, 1.25vw); -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 body { min-height: 100%; background: var(--navy); color: var(--cream); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
 [hidden] { display: none !important; }
 ul, ol { list-style: none; padding: 0; }
@@ -217,8 +217,9 @@ h1:focus-visible, h2:focus-visible { outline: none; }
 .review .miss span { background: var(--cream); }
 .review img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
 
-/* Narrow and portrait screens */
-@media (max-width: 900px), (max-aspect-ratio: 1/1) {
+/* Portrait screens */
+@media (max-aspect-ratio: 1/1) {
+  html { font-size: clamp(14px, min(1.97vh, 4.27vw), 48px); }
   .art-crt, .art-globe, .mark, .spark-3, .spark-4 { display: none; }
   .spark-1 { left: 6%; } .spark-2 { right: 6%; }
   .title { width: 84vw; }
@@ -232,7 +233,7 @@ h1:focus-visible, h2:focus-visible { outline: none; }
   .bar-end { position: absolute; right: 16px; top: 16px; }
   .chip { font-size: .8rem; }
   .prompt { width: 74vw; margin-top: 3rem; }
-  .pictures { --pic-w: min(calc(100vw - 32px - 1.7rem), calc((100svh - 22rem) / 2 * 1.5)); flex-direction: column; align-items: center; }
+  .pictures { --pic-w: min(calc(100vw - 32px - 1.7rem), calc((100svh - 27rem) / 2 * 1.5)); flex-direction: column; align-items: center; }
   .pic-head { font-size: 1.2rem; }
   .pick { font-size: .8rem; }
   .foot { grid-template-columns: 1fr; justify-items: center; gap: .5rem; }
