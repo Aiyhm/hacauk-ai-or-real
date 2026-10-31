@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
   <!-- Shared arcade art -->
@@ -40,17 +40,6 @@
     <symbol id="spark" viewBox="0 0 40 40">
       <path d="M20 0 L23.5 16.5 L40 20 L23.5 23.5 L20 40 L16.5 23.5 L0 20 L16.5 16.5Z" fill="#ffb317"/>
     </symbol>
-  </svg>
-
-  <!-- Worn paper edge with rounded poster corners -->
-  <svg class="paper-edge" aria-hidden="true">
-    <defs>
-      <filter id="rough" x="-3%" y="-3%" width="106%" height="106%">
-        <feTurbulence type="fractalNoise" baseFrequency=".05 .07" numOctaves="4" seed="8"/>
-        <feDisplacementMap in="SourceGraphic" scale="10"/>
-      </filter>
-    </defs>
-    <rect class="edge-rect" fill="none" stroke="#f3dfae" filter="url(#rough)"/>
   </svg>
 
   <!-- Start -->
@@ -150,6 +139,6 @@
     </div>
   </main>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

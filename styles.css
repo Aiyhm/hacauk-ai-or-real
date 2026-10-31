@@ -7,7 +7,6 @@
   --sun: #ffb317;
   --amber: #b9740c;
   --cream: #f8e8c3;
-  --paper: #f3dfae;
   --mono: "JetBrains Mono", Menlo, Consolas, monospace;
   --label: "Rajdhani", "Arial Narrow", Arial, sans-serif;
   --chamfer: polygon(1.1rem 0, calc(100% - 1.1rem) 0, 100% 1.1rem, 100% calc(100% - 1.1rem), calc(100% - 1.1rem) 100%, 1.1rem 100%, 0 calc(100% - 1.1rem), 0 1.1rem);
@@ -25,9 +24,6 @@ img { pointer-events: none; -webkit-user-drag: none; }
 :focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
 h1:focus-visible, h2:focus-visible { outline: none; }
 
-.paper-edge { position: fixed; inset: 0; z-index: 6; width: 100%; height: 100%; pointer-events: none; }
-body[data-screen="quiz"] .paper-edge { display: none; }
-.edge-rect { x: -18px; y: -18px; width: calc(100% + 36px); height: calc(100% + 36px); rx: 58px; ry: 58px; stroke-width: 46px; }
 .screen { position: relative; min-height: 100vh; min-height: 100svh; overflow: hidden; isolation: isolate; }
 
 /* Hard-edged gold rays with a halftone fall-off */
@@ -49,7 +45,7 @@ body[data-screen="quiz"] .paper-edge { display: none; }
   background: radial-gradient(circle, var(--navy) 42%, transparent 44%) 0 0 / .42rem .42rem;
   -webkit-mask-image: linear-gradient(transparent 38%, #000 86%); mask-image: linear-gradient(transparent 38%, #000 86%);
 }
-/* The quiz keeps clean rays behind its header: no paper grain or halftone */
+/* The quiz keeps clean rays behind its header: no grain or halftone */
 .rays-top { height: 6.2rem; -webkit-mask-image: none; mask-image: none; border-bottom: .2rem solid var(--gold); }
 .rays-top .rays { top: 0; }
 .rays-top::before, .rays-top::after { display: none; }

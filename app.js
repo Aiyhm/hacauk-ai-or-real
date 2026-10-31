@@ -69,6 +69,50 @@
   var results = []; // true or false for each answered pair
   var round = 0;
 
+  // Arcade sounds, synthesized so there are no audio files to load.
+  var audio = null;
+
+  function getAudio() {
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    if (!audio) audio = new Ctx();
+    if (audio.state === 'suspended') audio.resume();
+    return audio;
+  }
+
+  function tone(freq, delay, length, type, volume) {
+    var ctx = getAudio();
+    if (!ctx) return;
+    var at = ctx.currentTime + delay;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, at);
+    gain.gain.exponentialRampToValueAtTime(0.001, at + length);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(at);
+    osc.stop(at + length);
+  }
+
+  var sounds = {
+    tap: function () { tone(880, 0, 0.07, 'square', 0.12); },
+    correct: function () {
+      [523, 659, 784, 1047].forEach(function (freq, i) { tone(freq, 0.08 + i * 0.09, 0.16, 'square', 0.16); });
+    },
+    wrong: function () {
+      [311, 233, 156].forEach(function (freq, i) { tone(freq, 0.08 + i * 0.14, 0.2, 'sawtooth', 0.14); });
+    }
+  };
+
+  // Every touch or mouse press anywhere on the page gives a blip straight away.
+  document.addEventListener('pointerdown', sounds.tap);
+  // Keyboard presses arrive as clicks with no pointer behind them.
+  document.addEventListener('click', function (event) {
+    if (event.detail === 0) sounds.tap();
+  });
+
   function svgEl(name, attrs) {
     var el = document.createElementNS(NS, name);
     Object.keys(attrs || {}).forEach(function (key) { el.setAttribute(key, attrs[key]); });
@@ -175,7 +219,6 @@
 
   function show(name) {
     Object.keys(screens).forEach(function (key) { screens[key].hidden = key !== name; });
-    document.body.dataset.screen = name;
     window.scrollTo(0, 0);
   }
 
@@ -255,6 +298,7 @@
     var pair = game[round];
     var correct = letter === pair.ai;
     results.push(correct);
+    (correct ? sounds.correct : sounds.wrong)();
 
     Array.prototype.forEach.call($('pictures').children, function (button) {
       var isAi = button.dataset.letter === pair.ai;
