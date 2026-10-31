@@ -175,6 +175,7 @@
 
   function show(name) {
     Object.keys(screens).forEach(function (key) { screens[key].hidden = key !== name; });
+    document.body.dataset.screen = name;
     window.scrollTo(0, 0);
   }
 
